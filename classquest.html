@@ -274,17 +274,21 @@
                     <i class="fa-solid fa-check-double"></i>
                     <span>1. ตรวจให้คะแนน (แยกห้อง)</span>
                 </button>
+                <button onclick="switchTeacherTab('summary')" id="ttab-summary" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-800/80 text-slate-300 hover:bg-slate-800 transition flex items-center gap-2">
+                    <i class="fa-solid fa-table-list text-cyan-400"></i>
+                    <span>2. สรุปคะแนนรายวิชา</span>
+                </button>
                 <button onclick="switchTeacherTab('assign')" id="ttab-assign" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-800/80 text-slate-300 hover:bg-slate-800 transition flex items-center gap-2">
                     <i class="fa-solid fa-plus-circle text-sky-400"></i>
-                    <span>2. สั่งงาน / ตั้งเวลา</span>
+                    <span>3. สั่งงาน / ตั้งเวลา</span>
                 </button>
                 <button onclick="switchTeacherTab('subjects')" id="ttab-subjects" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-800/80 text-slate-300 hover:bg-slate-800 transition flex items-center gap-2">
                     <i class="fa-solid fa-book text-emerald-400"></i>
-                    <span>3. จัดการรายวิชา (เลือกห้อง)</span>
+                    <span>4. จัดการรายวิชา (เลือกห้อง)</span>
                 </button>
                 <button onclick="switchTeacherTab('classrooms')" id="ttab-classrooms" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-800/80 text-slate-300 hover:bg-slate-800 transition flex items-center gap-2">
                     <i class="fa-solid fa-users-rectangle text-amber-400"></i>
-                    <span>4. ห้องเรียน & นักเรียน</span>
+                    <span>5. ห้องเรียน & นักเรียน</span>
                 </button>
             </div>
         </section>
@@ -346,47 +350,86 @@
             </div>
         </section>
 
-        <!-- TAB 2: สั่งงานใหม่ & ตั้งเวลาถอยหลัง -->
+        <!-- TAB 2: ตารางสรุปคะแนนรายวิชา (รายคน) -->
+        <section id="panel-summary" class="hidden space-y-4">
+            <div class="glass-panel rounded-2xl p-5 sm:p-6">
+                <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-5 border-b border-slate-800">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">1. เลือกห้องเรียน</label>
+                            <select id="summary-room-select" onchange="onSummaryRoomChange()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">2. เลือกรายวิชาที่ต้องการดูสรุป</label>
+                            <select id="summary-subject-select" onchange="renderSubjectSummaryTable()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="exportSubjectSummaryCSV()" class="px-4 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs sm:text-sm font-medium transition flex items-center justify-center gap-2 shrink-0">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>ดาวน์โหลดตารางคะแนน (CSV / Excel)</span>
+                    </button>
+                </div>
+
+                <div id="summary-meta-bar" class="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+                </div>
+
+                <div class="mt-3 overflow-x-auto rounded-xl border border-slate-800">
+                    <table class="w-full text-left border-collapse">
+                        <thead id="summary-table-head" class="bg-slate-900/90 text-xs text-slate-300 border-b border-slate-800">
+                        </thead>
+                        <tbody id="summary-table-body" class="divide-y divide-slate-800/70 text-sm">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: สั่งงานใหม่ & ตั้งเวลาถอยหลัง -->
         <section id="panel-assign" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div class="lg:col-span-5 glass-panel rounded-2xl p-5 sm:p-6">
                 <h3 class="text-base sm:text-lg font-semibold text-white mb-1 flex items-center gap-2">
-                    <i class="fa-solid fa-wand-magic-sparkles text-sky-400"></i>
+                    <i class="fa-solid fa-stopwatch text-sky-400"></i>
                     สร้างภารกิจ / สั่งงานใหม่
                 </h3>
-                <p class="text-xs text-slate-400 mb-4">เลือกห้องเรียนและวิชาที่ผูกไว้ งานจะส่งตรงถึงเด็กทุกคนในห้องที่สอนรวม</p>
+                <p class="text-xs text-slate-400 mb-4">เลือกห้องและวิชา แล้วตั้งเวลาหมดเขตส่ง ระบบนับถอยหลังให้ทันที</p>
 
-                <form id="create-quest-form" onsubmit="handleCreateQuest(event)" class="space-y-4">
+                <form onsubmit="handleCreateQuest(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs text-slate-300 mb-1">1. เลือกห้องเรียน</label>
-                        <select id="new-quest-room" onchange="populateSubjectsForQuestForm()" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
+                        <select id="new-quest-room" onchange="populateSubjectsForQuestForm()" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
                         </select>
                     </div>
 
                     <div>
                         <label class="block text-xs text-slate-300 mb-1">2. เลือกรายวิชาของห้องนี้</label>
-                        <select id="new-quest-subject" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
+                        <select id="new-quest-subject" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-xs text-slate-300 mb-1">3. ชื่องาน / ภารกิจ</label>
-                        <input type="text" id="new-quest-title" required placeholder="เช่น แบบฝึกหัดที่ 4: คำนวณแรงดึงเหล็ก"
+                        <label class="block text-xs text-slate-300 mb-1">3. ชื่องาน / รายละเอียดภารกิจ</label>
+                        <input type="text" id="new-quest-title" required placeholder="เช่น ใบงานที่ 3: การผูกเหล็กเสริมคาน"
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs text-slate-300 mb-1">คะแนนเต็ม</label>
-                            <input type="number" id="new-quest-max" required min="1" max="100" value="10"
+                            <input type="number" id="new-quest-max" required min="1" max="100" value="15"
                                 class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
                         </div>
                         <div>
-                            <label class="block text-xs text-slate-300 mb-1">เวลาถอยหลังด่วน</label>
-                            <select id="new-quest-preset" onchange="applyDeadlinePreset(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
-                                <option value="custom">กำหนดวัน-เวลาเอง</option>
+                            <label class="block text-xs text-slate-300 mb-1">กำหนดส่งด่วน</label>
+                            <select onchange="applyDeadlinePreset(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
+                                <option value="custom" selected>กำหนดเอง...</option>
                                 <option value="30m">อีก 30 นาที (ในคาบ)</option>
                                 <option value="2h">อีก 2 ชั่วโมง</option>
-                                <option value="1d" selected>พรุ่งนี้ (24 ชม.)</option>
+                                <option value="1d">พรุ่งนี้ (24 ชม.)</option>
                                 <option value="7d">สัปดาห์หน้า (7 วัน)</option>
                             </select>
                         </div>
@@ -416,7 +459,7 @@
             </div>
         </section>
 
-        <!-- TAB 3: จัดการรายวิชา (ผูก 1 วิชากับหลายห้องเรียนได้) -->
+        <!-- TAB 4: จัดการรายวิชา (ผูก 1 วิชากับหลายห้องเรียนได้) -->
         <section id="panel-subjects" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div class="lg:col-span-5 glass-panel rounded-2xl p-5 sm:p-6">
                 <div class="flex items-center justify-between mb-1">
@@ -497,7 +540,7 @@
             </div>
         </section>
 
-        <!-- TAB 4: จัดการห้องเรียน & เพิ่มนักเรียน -->
+        <!-- TAB 5: จัดการห้องเรียน & เพิ่มนักเรียน -->
         <section id="panel-classrooms" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Left: Create Classroom & Add Students -->
             <div class="lg:col-span-6 space-y-6">
@@ -642,12 +685,8 @@
     </main>
 
     <script>
-        // =========================================================================
-        // 1. โครงสร้างข้อมูลหลัก (Many-to-Many Subject-to-Classrooms & Cloud Sync)
-        // =========================================================================
         const STORAGE_KEY = 'classquest_pro_v4_multi';
         const GAS_URL_STORAGE_KEY = 'classquest_pro_v4_gas_url';
-        // [ตัวเลือกเสริม] คุณครูสามารถวางลิงก์ Web App URL ไว้ในเครื่องหมายคำพูดด้านล่างนี้ได้เลย เพื่อให้เปิดจากเครื่องไหนก็เชื่อมชีตทันที
         const DEFAULT_GAS_WEBHOOK_URL = '';
         const MINUTE = 60 * 1000;
         const HOUR = 60 * MINUTE;
@@ -663,13 +702,13 @@
                     { id: 'room-201', name: 'ปวช.2/1 สถาปัตยกรรม' }
                 ],
                 students: [
-                    { id: '69101', roomId: 'room-101', name: 'นายธนากร รักเรียน', avatar: '👷‍♂️', password: '69101' },
-                    { id: '69102', roomId: 'room-101', name: 'นายกิตติพงศ์ สายชิล', avatar: '🛠️', password: '69102' },
-                    { id: '69103', roomId: 'room-101', name: 'นางสาวณัฐริกา ขยันยิ่ง', avatar: '👩‍🎓', password: '69103' },
-                    { id: '69121', roomId: 'room-102', name: 'นายชัชวาล งานไว', avatar: '🧱', password: '69121' },
-                    { id: '69122', roomId: 'room-102', name: 'นางสาวกมลชนก ตั้งใจเรียน', avatar: '📐', password: '69122' },
-                    { id: '69201', roomId: 'room-201', name: 'นายภูวดล ออกแบบเก่ง', avatar: '🏛️', password: '69201' },
-                    { id: '69202', roomId: 'room-201', name: 'นางสาวพิมพ์ชนก วาดสวย', avatar: '✏️', password: '69202' }
+                    { id: '69101', roomId: 'room-101', name: 'นายธนากร รักเรียน', avatar: '👷‍♂️', password: '69101', profileImg: '', bgTheme: 'default', bgCustom: '' },
+                    { id: '69102', roomId: 'room-101', name: 'นายกิตติพงศ์ สายชิล', avatar: '🛠️', password: '69102', profileImg: '', bgTheme: 'default', bgCustom: '' },
+                    { id: '69103', roomId: 'room-101', name: 'นางสาวณัฐริกา ขยันยิ่ง', avatar: '👩‍🎓', password: '69103', profileImg: '', bgTheme: 'default', bgCustom: '' },
+                    { id: '69121', roomId: 'room-102', name: 'นายชัชวาล งานไว', avatar: '🧱', password: '69121', profileImg: '', bgTheme: 'default', bgCustom: '' },
+                    { id: '69122', roomId: 'room-102', name: 'นางสาวกมลชนก ตั้งใจเรียน', avatar: '📐', password: '69122', profileImg: '', bgTheme: 'default', bgCustom: '' },
+                    { id: '69201', roomId: 'room-201', name: 'นายภูวดล ออกแบบเก่ง', avatar: '🏛️', password: '69201', profileImg: '', bgTheme: 'default', bgCustom: '' },
+                    { id: '69202', roomId: 'room-201', name: 'นางสาวพิมพ์ชนก วาดสวย', avatar: '✏️', password: '69202', profileImg: '', bgTheme: 'default', bgCustom: '' }
                 ],
                 subjects: [
                     { id: 'sub-const1', roomIds: ['room-101', 'room-102'], code: '20108-2021', name: 'เทคนิคก่อสร้าง 1 (สอนรวม)', totalMax: 100, color: 'sky' },
@@ -722,6 +761,9 @@
             if (!Array.isArray(data.students)) data.students = [];
             data.students.forEach(st => {
                 if (!st.password) st.password = String(st.id);
+                if (typeof st.profileImg !== 'string') st.profileImg = '';
+                if (typeof st.bgTheme !== 'string') st.bgTheme = 'default';
+                if (typeof st.bgCustom !== 'string') st.bgCustom = '';
             });
             if (!Array.isArray(data.subjects)) data.subjects = [];
             data.subjects.forEach(sub => {
@@ -746,17 +788,14 @@
 
         function loadGasWebhookUrl() {
             try {
-                // 1. เช็กจากพารามิเตอร์ ?db=... ในลิงก์ที่ส่งให้นักเรียนก่อน
                 const params = new URLSearchParams(window.location.search);
                 const dbParam = (params.get('db') || '').trim();
                 if (dbParam && /^https:\/\/script\.google\.com\/macros\/s\/.+/i.test(dbParam)) {
                     localStorage.setItem(GAS_URL_STORAGE_KEY, dbParam);
                     return dbParam;
                 }
-                // 2. เช็กจากที่เคยบันทึกไว้ในเครื่อง
                 const saved = (localStorage.getItem(GAS_URL_STORAGE_KEY) || '').trim();
                 if (saved) return saved;
-                // 3. ใช้ค่าที่ฝังไว้ในโค้ด (ถ้ามี)
                 return (DEFAULT_GAS_WEBHOOK_URL || '').trim();
             } catch (e) {
                 return (DEFAULT_GAS_WEBHOOK_URL || '').trim();
@@ -895,9 +934,6 @@
             showToast('รีเซ็ตข้อมูลกลับเป็นชุดตัวอย่างเรียบร้อยแล้ว', 'info');
         }
 
-        // =========================================================================
-        // 2. Helper Functions
-        // =========================================================================
         const COLOR_MAP = {
             sky: { badge: 'bg-sky-500/15 text-sky-400 border-sky-500/30', bar: 'from-sky-500 to-cyan-400', text: 'text-sky-400' },
             emerald: { badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30', bar: 'from-emerald-500 to-teal-400', text: 'text-emerald-400' },
@@ -974,9 +1010,6 @@
             }, 3000);
         }
 
-        // =========================================================================
-        // 3. ระบบสลับโหมด, ล็อกอินครู และล็อกอินนักเรียน
-        // =========================================================================
         function handleTeacherButtonClick() {
             if (isTeacherAuthenticated) {
                 switchMode('teacher');
@@ -1041,7 +1074,7 @@
         }
 
         function switchTeacherTab(tab) {
-            const tabs = ['grading', 'assign', 'subjects', 'classrooms'];
+            const tabs = ['grading', 'summary', 'assign', 'subjects', 'classrooms'];
             tabs.forEach(t => {
                 const panel = document.getElementById(`panel-${t}`);
                 const btn = document.getElementById(`ttab-${t}`);
@@ -1114,25 +1147,132 @@
             showToast('เปลี่ยนรหัสผ่านส่วนตัวเรียบร้อยแล้ว!', 'success');
         }
 
-        // =========================================================================
-        // 4. หน้านักเรียน & ผู้ปกครอง (แยกห้อง + ส่งลิงก์งานเมื่อล็อกอิน)
-        // =========================================================================
+        const STUDENT_BG_PRESETS = {
+            default: { label: 'ค่าเริ่มต้น (Midnight)', style: '' },
+            cyber: { label: 'Cyber Neon', style: 'background: linear-gradient(135deg, rgba(14,165,233,0.28), rgba(168,85,247,0.28), rgba(15,23,42,0.92));' },
+            emerald: { label: 'Forest Aurora', style: 'background: linear-gradient(135deg, rgba(16,185,129,0.28), rgba(6,182,212,0.22), rgba(15,23,42,0.92));' },
+            sunset: { label: 'Sunset Gold', style: 'background: linear-gradient(135deg, rgba(245,158,11,0.28), rgba(244,63,94,0.28), rgba(15,23,42,0.92));' },
+            royal: { label: 'Royal Indigo', style: 'background: linear-gradient(135deg, rgba(99,102,241,0.32), rgba(236,72,153,0.24), rgba(15,23,42,0.92));' }
+        };
+
+        function compressImageFile(file, maxWidth, maxHeight, quality = 0.78) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let w = img.width;
+                        let h = img.height;
+                        if (w > maxWidth || h > maxHeight) {
+                            const ratio = Math.min(maxWidth / w, maxHeight / h);
+                            w = Math.round(w * ratio);
+                            h = Math.round(h * ratio);
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                    img.src = ev.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleStudentAvatarUpload(event) {
+            const student = appData.students.find(s => s.id === currentStudentId);
+            if (!student || !isCurrentStudentLoggedIn()) return;
+            const file = event.target.files?.[0];
+            if (!file) return;
+            try {
+                const dataUrl = await compressImageFile(file, 220, 220, 0.8);
+                student.profileImg = dataUrl;
+                saveAppData();
+                renderStudentDashboard();
+                showToast('อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว!', 'success');
+            } catch (e) {
+                showToast('ไม่สามารถอัปโหลดรูปภาพได้ กรุณาลองไฟล์อื่น', 'error');
+            }
+        }
+
+        function resetStudentAvatar() {
+            const student = appData.students.find(s => s.id === currentStudentId);
+            if (!student || !isCurrentStudentLoggedIn()) return;
+            student.profileImg = '';
+            saveAppData();
+            renderStudentDashboard();
+            showToast('รีเซ็ตรูปโปรไฟล์กลับเป็นค่าเริ่มต้นแล้ว', 'info');
+        }
+
+        function setStudentBgPreset(presetKey) {
+            const student = appData.students.find(s => s.id === currentStudentId);
+            if (!student || !isCurrentStudentLoggedIn()) return;
+            student.bgTheme = presetKey;
+            student.bgCustom = '';
+            saveAppData();
+            renderStudentDashboard();
+            showToast('เปลี่ยนธีมพื้นหลังส่วนตัวเรียบร้อย!', 'success');
+        }
+
+        async function handleStudentBgUpload(event) {
+            const student = appData.students.find(s => s.id === currentStudentId);
+            if (!student || !isCurrentStudentLoggedIn()) return;
+            const file = event.target.files?.[0];
+            if (!file) return;
+            try {
+                const dataUrl = await compressImageFile(file, 960, 540, 0.72);
+                student.bgTheme = 'custom';
+                student.bgCustom = dataUrl;
+                saveAppData();
+                renderStudentDashboard();
+                showToast('อัปโหลดรูปพื้นหลังส่วนตัวเรียบร้อย!', 'success');
+            } catch (e) {
+                showToast('ไม่สามารถอัปโหลดภาพพื้นหลังได้ กรุณาลองไฟล์อื่น', 'error');
+            }
+        }
+
+        function applyStudentBgUrl() {
+            const student = appData.students.find(s => s.id === currentStudentId);
+            if (!student || !isCurrentStudentLoggedIn()) return;
+            const input = document.getElementById('student-bg-url-input');
+            const url = (input?.value || '').trim();
+            if (!url) {
+                showToast('กรุณาวางลิงก์รูปภาพก่อนครับ', 'error');
+                return;
+            }
+            student.bgTheme = 'custom';
+            student.bgCustom = url;
+            saveAppData();
+            renderStudentDashboard();
+            showToast('ตั้งค่ารูปพื้นหลังจากลิงก์เรียบร้อย!', 'success');
+        }
+
+        function getStudentBannerBackgroundStyle(student) {
+            if (!student) return '';
+            if (student.bgTheme === 'custom' && student.bgCustom) {
+                const safeUrl = student.bgCustom.replace(/"/g, '%22');
+                return `background-image: linear-gradient(to right, rgba(6, 9, 19, 0.86), rgba(15, 23, 42, 0.78)), url("${safeUrl}"); background-size: cover; background-position: center;`;
+            }
+            return STUDENT_BG_PRESETS[student.bgTheme]?.style || '';
+        }
+
         function populateStudentFilters() {
             const roomFilter = document.getElementById('student-room-filter');
             const prevRoom = roomFilter.value || 'all';
             roomFilter.innerHTML = `<option value="all">ทุกห้องเรียน (${appData.classrooms.length} ห้อง)</option>` +
                 appData.classrooms.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
             roomFilter.value = appData.classrooms.some(r => r.id === prevRoom) ? prevRoom : 'all';
-
             populateStudentSelector();
         }
 
         function handleStudentRoomFilterChange() {
             populateStudentSelector();
             const selector = document.getElementById('student-selector');
-            if (selector.value) {
-                currentStudentId = selector.value;
-            }
+            if (selector.value) currentStudentId = selector.value;
             renderStudentDashboard();
         }
 
@@ -1204,9 +1344,7 @@
                 input.focus();
                 return;
             }
-            if (!/^https?:\/\//i.test(url)) {
-                url = 'https://' + url;
-            }
+            if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
             const subData = getSubmission(currentStudentId, questId);
             subData.submitted = true;
@@ -1257,10 +1395,31 @@
             const xpInLevel = (totalEarned % 15) / 15 * 100;
             const canSubmit = isCurrentStudentLoggedIn();
 
+            const topSection = banner.closest('section');
+            if (topSection) {
+                topSection.setAttribute('style', getStudentBannerBackgroundStyle(student));
+            }
+
+            const avatarVisualHtml = student.profileImg
+                ? `<img src="${student.profileImg}" alt="${student.name}" class="w-full h-full object-cover">`
+                : `<span>${student.avatar || '🎓'}</span>`;
+
+            const presetButtonsHtml = Object.entries(STUDENT_BG_PRESETS).map(([key, item]) => {
+                const active = (student.bgTheme || 'default') === key;
+                return `<button type="button" onclick="setStudentBgPreset('${key}')" class="px-2 py-1 rounded-lg text-[11px] border transition ${active ? 'bg-sky-500 text-slate-950 font-semibold border-sky-400' : 'bg-slate-900/90 text-slate-300 border-slate-700 hover:border-slate-500'}">${item.label}</button>`;
+            }).join('');
+
             banner.innerHTML = `
                 <div class="lg:col-span-6 flex items-center gap-4">
-                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-sky-500/40 flex items-center justify-center text-3xl shadow-inner shrink-0">
-                        ${student.avatar || '🎓'}
+                    <div class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-sky-500/50 flex items-center justify-center text-3xl shadow-lg overflow-hidden shrink-0 group">
+                        ${avatarVisualHtml}
+                        ${canSubmit ? `
+                            <label title="เปลี่ยนรูปโปรไฟล์" class="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-[10px] text-sky-300 font-medium cursor-pointer transition">
+                                <i class="fa-solid fa-camera text-sm mb-0.5"></i>
+                                <span>เปลี่ยนรูป</span>
+                                <input type="file" accept="image/*" onchange="handleStudentAvatarUpload(event)" class="hidden">
+                            </label>
+                        ` : ''}
                     </div>
                     <div>
                         <div class="flex flex-wrap items-center gap-2">
@@ -1270,18 +1429,27 @@
                             </span>
                         </div>
                         <h3 class="text-lg sm:text-xl font-bold text-white mt-1">${student.name}</h3>
-                        <p class="text-xs text-slate-400">ลงทะเบียน ${roomSubjects.length} รายวิชา • ภารกิจทั้งหมด ${roomQuests.length} ชิ้น</p>
+                        <p class="text-xs text-slate-300">ลงทะเบียน ${roomSubjects.length} รายวิชา • ภารกิจทั้งหมด ${roomQuests.length} ชิ้น</p>
+                        ${canSubmit ? `
+                            <div class="mt-1.5 flex flex-wrap items-center gap-2">
+                                <label class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-[11px] cursor-pointer transition">
+                                    <i class="fa-solid fa-camera"></i> อัปโหลดรูปโปรไฟล์
+                                    <input type="file" accept="image/*" onchange="handleStudentAvatarUpload(event)" class="hidden">
+                                </label>
+                                ${student.profileImg ? `<button type="button" onclick="resetStudentAvatar()" class="text-[11px] text-slate-400 hover:text-rose-300">ลบรูป</button>` : ''}
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
 
                 <div class="lg:col-span-6 space-y-2.5">
-                    <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl ${canSubmit ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-slate-900/90 border border-slate-800'}">
+                    <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl ${canSubmit ? 'bg-emerald-500/15 border border-emerald-500/35 backdrop-blur-md' : 'bg-slate-900/90 border border-slate-800'}">
                         ${canSubmit ? `
                             <div class="flex items-center gap-2 text-xs text-emerald-300">
                                 <i class="fa-solid fa-circle-check text-emerald-400"></i>
-                                <span>ล็อกอินเป็น <b>${student.id}</b> แล้ว (ส่ง/แก้ไขลิงก์งานได้)</span>
+                                <span>ล็อกอินเป็น <b>${student.id}</b> แล้ว</span>
                             </div>
-                            <div class="flex items-center gap-1.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
                                 <input type="password" id="student-new-pass-input" placeholder="รหัสผ่านใหม่..." class="w-28 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:border-emerald-500">
                                 <button type="button" onclick="changeOwnStudentPassword()" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[11px] font-medium transition">
                                     เปลี่ยนรหัส
@@ -1291,7 +1459,7 @@
                                 </button>
                             </div>
                         ` : `
-                            <div class="flex items-center gap-2 text-xs text-slate-400">
+                            <div class="flex items-center gap-2 text-xs text-slate-300">
                                 <i class="fa-solid fa-eye text-sky-400"></i>
                                 <span>โหมดดูคะแนน (ผู้ปกครอง / บุคคลทั่วไป)</span>
                             </div>
@@ -1302,7 +1470,29 @@
                         `}
                     </div>
 
-                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                    ${canSubmit ? `
+                        <div class="p-2.5 rounded-xl bg-slate-950/75 border border-slate-800/90 space-y-2 backdrop-blur-md">
+                            <div class="flex flex-wrap items-center justify-between gap-1.5">
+                                <span class="text-[11px] font-medium text-purple-300"><i class="fa-solid fa-palette mr-1"></i>ปรับแต่งภาพพื้นหลังส่วนตัว:</span>
+                                <label class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-[11px] cursor-pointer transition">
+                                    <i class="fa-solid fa-image"></i> อัปโหลดรูปพื้นหลัง
+                                    <input type="file" accept="image/*" onchange="handleStudentBgUpload(event)" class="hidden">
+                                </label>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5">
+                                ${presetButtonsHtml}
+                            </div>
+                            <div class="flex gap-1.5">
+                                <input type="url" id="student-bg-url-input" value="${student.bgTheme === 'custom' && student.bgCustom.startsWith('http') ? student.bgCustom : ''}" placeholder="หรือวางลิงก์รูปภาพพื้นหลัง (https://...)"
+                                    class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-purple-500">
+                                <button type="button" onclick="applyStudentBgUrl()" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-medium transition shrink-0">
+                                    ใช้ลิงก์นี้
+                                </button>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="bg-slate-900/85 p-3 rounded-xl border border-slate-800">
                         <div class="flex justify-between text-xs mb-1">
                             <span class="text-slate-400 font-medium">Level ${level} Progress</span>
                             <span class="text-sky-400 font-mono-code font-bold">${totalEarned} / ${totalPossibleFromQuests} XP</span>
@@ -1323,7 +1513,6 @@
                     <div class="text-2xl sm:text-3xl font-bold text-white font-mono-code">${totalEarned}<span class="text-sm text-slate-500 font-normal">/${totalPossibleFromQuests}</span></div>
                     <div class="text-[11px] text-emerald-400 mt-1">คิดเป็น ${overallPercent}% ของงานที่สั่ง</div>
                 </div>
-
                 <div class="glass-card rounded-2xl p-4">
                     <div class="flex items-center justify-between text-slate-400 text-xs mb-1">
                         <span>ส่งงานแล้ว</span>
@@ -1332,7 +1521,6 @@
                     <div class="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono-code">${submittedCount}<span class="text-sm text-slate-500 font-normal">/${roomQuests.length}</span></div>
                     <div class="text-[11px] text-slate-400 mt-1">ชิ้นงานที่ส่งเรียบร้อย</div>
                 </div>
-
                 <div class="glass-card rounded-2xl p-4">
                     <div class="flex items-center justify-between text-slate-400 text-xs mb-1">
                         <span>งานค้างส่ง</span>
@@ -1341,7 +1529,6 @@
                     <div class="text-2xl sm:text-3xl font-bold ${pendingCount > 0 ? 'text-rose-400' : 'text-slate-200'} font-mono-code">${pendingCount}</div>
                     <div class="text-[11px] ${pendingCount > 0 ? 'text-rose-300' : 'text-emerald-400'} mt-1">${pendingCount > 0 ? 'รีบแนบลิงก์ส่งก่อนหมดเวลา!' : 'ยอดเยี่ยม ไม่มีงานค้าง'}</div>
                 </div>
-
                 <div class="glass-card rounded-2xl p-4">
                     <div class="flex items-center justify-between text-slate-400 text-xs mb-1">
                         <span>รายวิชาของห้อง</span>
@@ -1354,18 +1541,12 @@
 
             document.getElementById('subject-count-badge').textContent = `${roomSubjects.length} วิชา`;
             if (roomSubjects.length === 0) {
-                subjectContainer.innerHTML = `
-                    <div class="glass-card rounded-2xl p-6 text-center text-slate-400 text-xs">
-                        ยังไม่มีรายวิชาที่ผูกกับห้อง ${getClassroomName(student.roomId)}
-                    </div>
-                `;
+                subjectContainer.innerHTML = `<div class="glass-card rounded-2xl p-6 text-center text-slate-400 text-xs">ยังไม่มีรายวิชาที่ผูกกับห้อง ${getClassroomName(student.roomId)}</div>`;
             } else {
                 subjectContainer.innerHTML = roomSubjects.map(sub => {
                     const c = COLOR_MAP[sub.color] || COLOR_MAP.sky;
                     const subQuests = roomQuests.filter(q => q.subjectId === sub.id);
-                    let earned = 0;
-                    let assignedMax = 0;
-                    let done = 0;
+                    let earned = 0, assignedMax = 0, done = 0;
                     subQuests.forEach(q => {
                         assignedMax += q.maxScore;
                         const sData = getSubmission(student.id, q.id);
@@ -1376,7 +1557,6 @@
                     });
                     const pct = sub.totalMax > 0 ? Math.min(100, Math.round((earned / sub.totalMax) * 100)) : 0;
                     const isMulti = sub.roomIds.length > 1;
-
                     return `
                         <div class="glass-card rounded-2xl p-4 space-y-3">
                             <div class="flex items-start justify-between gap-2">
@@ -1412,12 +1592,7 @@
             }).sort((a, b) => a.deadline - b.deadline);
 
             if (filteredQuests.length === 0) {
-                questContainer.innerHTML = `
-                    <div class="glass-card rounded-2xl p-8 text-center text-slate-400">
-                        <i class="fa-solid fa-sparkles text-2xl text-sky-400 mb-2"></i>
-                        <p class="text-sm">ไม่มีรายการงานในหมวดหมู่นี้</p>
-                    </div>
-                `;
+                questContainer.innerHTML = `<div class="glass-card rounded-2xl p-8 text-center text-slate-400"><i class="fa-solid fa-sparkles text-2xl text-sky-400 mb-2"></i><p class="text-sm">ไม่มีรายการงานในหมวดหมู่นี้</p></div>`;
             } else {
                 questContainer.innerHTML = filteredQuests.map(q => {
                     const sub = appData.subjects.find(s => s.id === q.subjectId) || { name: 'ไม่ระบุวิชา', code: '-', color: 'sky' };
@@ -1478,9 +1653,7 @@
                                     </div>
                                     <h4 class="font-semibold text-white text-sm sm:text-base">${q.title}</h4>
                                 </div>
-                                <div class="shrink-0">
-                                    ${statusBadge}
-                                </div>
+                                <div class="shrink-0">${statusBadge}</div>
                             </div>
                             ${linkBoxHtml}
                         </div>
@@ -1489,9 +1662,6 @@
             }
         }
 
-        // =========================================================================
-        // 5. โหมดคุณครู: ห้องเรียน ➔ วิชา (เลือกหลายห้อง) ➔ สั่งงาน ➔ ตรวจให้คะแนน
-        // =========================================================================
         function refreshTeacherSelectors() {
             const roomOptionsHtml = appData.classrooms.length === 0
                 ? `<option value="">-- กรุณาสร้างห้องเรียนก่อน --</option>`
@@ -1502,6 +1672,14 @@
             gradeRoom.innerHTML = roomOptionsHtml;
             if (appData.classrooms.some(r => r.id === prevGradeRoom)) gradeRoom.value = prevGradeRoom;
             onGradeRoomChange();
+
+            const summaryRoom = document.getElementById('summary-room-select');
+            if (summaryRoom) {
+                const prevSummaryRoom = summaryRoom.value;
+                summaryRoom.innerHTML = roomOptionsHtml;
+                if (appData.classrooms.some(r => r.id === prevSummaryRoom)) summaryRoom.value = prevSummaryRoom;
+                onSummaryRoomChange();
+            }
 
             const questRoom = document.getElementById('new-quest-room');
             const prevQuestRoom = questRoom.value;
@@ -1537,7 +1715,6 @@
             const input = document.getElementById('new-room-name');
             const name = input.value.trim();
             if (!name) return;
-
             const newRoom = { id: 'room-' + Date.now(), name };
             appData.classrooms.push(newRoom);
             input.value = '';
@@ -1553,7 +1730,6 @@
             if (!roomId) return;
             const room = appData.classrooms.find(r => r.id === roomId);
             if (!room) return;
-
             appData.classrooms = appData.classrooms.filter(r => r.id !== roomId);
             appData.students = appData.students.filter(s => s.roomId !== roomId);
             appData.subjects.forEach(sub => {
@@ -1562,7 +1738,6 @@
             const emptySubIds = new Set(appData.subjects.filter(s => s.roomIds.length === 0).map(s => s.id));
             appData.subjects = appData.subjects.filter(s => s.roomIds.length > 0);
             appData.quests = appData.quests.filter(q => !emptySubIds.has(q.subjectId));
-
             saveAppData();
             refreshAllViews();
             showToast(`ลบห้องเรียน "${room.name}" เรียบร้อยแล้ว`, 'info');
@@ -1580,16 +1755,13 @@
             const id = idInput.value.trim();
             const name = nameInput.value.trim();
             if (!id || !name) return;
-
             if (appData.students.some(s => s.id === id)) {
                 showToast(`รหัสนักเรียน ${id} มีอยู่ในระบบแล้ว`, 'error');
                 return;
             }
-
             const avatars = ['👷‍♂️', '👩‍🎓', '🛠️', '🏛️', '📐', '🧑‍💻', '👷‍♀️'];
             const avatar = avatars[appData.students.length % avatars.length];
-            appData.students.push({ id, roomId, name, avatar, password: id });
-
+            appData.students.push({ id, roomId, name, avatar, password: id, profileImg: '', bgTheme: 'default', bgCustom: '' });
             idInput.value = '';
             nameInput.value = '';
             saveAppData();
@@ -1609,11 +1781,8 @@
                 showToast('กรุณาวางรายชื่อนักเรียนในช่องข้อความก่อนครับ', 'error');
                 return;
             }
-
-            let added = 0;
-            let skipped = 0;
+            let added = 0, skipped = 0;
             const avatars = ['👷‍♂️', '👩‍🎓', '🛠️', '🏛️', '📐', '🧑‍💻', '👷‍♀️'];
-
             lines.forEach(line => {
                 const parts = line.includes(',') ? line.split(',') : line.split(/\t|\s{2,}/);
                 if (parts.length >= 2) {
@@ -1621,14 +1790,13 @@
                     const name = parts.slice(1).join(' ').trim();
                     if (id && name && !appData.students.some(s => s.id === id)) {
                         const avatar = avatars[(appData.students.length + added) % avatars.length];
-                        appData.students.push({ id, roomId, name, avatar, password: id });
+                        appData.students.push({ id, roomId, name, avatar, password: id, profileImg: '', bgTheme: 'default', bgCustom: '' });
                         added++;
                     } else {
                         skipped++;
                     }
                 }
             });
-
             textarea.value = '';
             saveAppData();
             refreshAllViews();
@@ -1647,21 +1815,17 @@
             const roomId = document.getElementById('manage-student-room-select').value;
             const subtitle = document.getElementById('roster-room-subtitle');
             const list = document.getElementById('classroom-roster-list');
-
             if (!roomId) {
                 subtitle.textContent = 'ยังไม่มีห้องเรียนในระบบ';
                 list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">กรุณาสร้างห้องเรียนทางด้านซ้าย</div>`;
                 return;
             }
-
             const roomStudents = appData.students.filter(s => s.roomId === roomId);
             subtitle.textContent = `${getClassroomName(roomId)} • ทั้งหมด ${roomStudents.length} คน`;
-
             if (roomStudents.length === 0) {
                 list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">ยังไม่มีรายชื่อนักเรียนในห้องนี้</div>`;
                 return;
             }
-
             list.innerHTML = roomStudents.map(s => `
                 <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
                     <div class="flex items-center gap-2.5">
@@ -1691,24 +1855,20 @@
             showToast('เปลี่ยนรหัส PIN คุณครูเรียบร้อยแล้ว!', 'success');
         }
 
-        // --- Multi-Classroom Subject Management ---
         function renderSubjectRoomCheckboxes(selectedIds = []) {
             const container = document.getElementById('new-subject-rooms-container');
             if (!container) return;
-
             if (appData.classrooms.length === 0) {
-                container.innerHTML = `<div class="col-span-2 text-xs text-slate-500 py-2 text-center">ยังไม่มีห้องเรียน กรุณาสร้างห้องในแท็บ 4 ก่อนครับ</div>`;
+                container.innerHTML = `<div class="col-span-2 text-xs text-slate-500 py-2 text-center">ยังไม่มีห้องเรียน กรุณาสร้างห้องในแท็บ 5 ก่อนครับ</div>`;
                 updateSelectedRoomsCounter();
                 return;
             }
-
             container.innerHTML = appData.classrooms.map(r => {
                 const checked = selectedIds.includes(r.id) ? 'checked' : '';
                 const count = appData.students.filter(s => s.roomId === r.id).length;
                 return `
                     <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-950/90 border border-slate-800 hover:border-emerald-500/40 cursor-pointer text-xs text-slate-200 select-none">
-                        <input type="checkbox" name="subject-room-checkbox" value="${r.id}" ${checked} onchange="updateSelectedRoomsCounter()"
-                            class="w-4 h-4 rounded accent-emerald-500">
+                        <input type="checkbox" name="subject-room-checkbox" value="${r.id}" ${checked} onchange="updateSelectedRoomsCounter()" class="w-4 h-4 rounded accent-emerald-500">
                         <span class="truncate flex-1">${r.name}</span>
                         <span class="text-[10px] text-slate-500">${count} คน</span>
                     </label>
@@ -1722,9 +1882,7 @@
         }
 
         function toggleAllSubjectRooms(selectAll) {
-            document.querySelectorAll('input[name="subject-room-checkbox"]').forEach(cb => {
-                cb.checked = selectAll;
-            });
+            document.querySelectorAll('input[name="subject-room-checkbox"]').forEach(cb => { cb.checked = selectAll; });
             updateSelectedRoomsCounter();
         }
 
@@ -1767,7 +1925,6 @@
                 showToast('กรุณาติ๊กเลือกห้องเรียนที่สอนอย่างน้อย 1 ห้องครับ', 'error');
                 return;
             }
-
             const editId = document.getElementById('edit-subject-id').value;
             const code = document.getElementById('new-subject-code').value.trim();
             const name = document.getElementById('new-subject-name').value.trim();
@@ -1776,26 +1933,12 @@
 
             if (editId) {
                 const sub = appData.subjects.find(s => s.id === editId);
-                if (sub) {
-                    sub.roomIds = roomIds;
-                    sub.code = code;
-                    sub.name = name;
-                    sub.totalMax = totalMax;
-                    sub.color = color;
-                }
+                if (sub) { sub.roomIds = roomIds; sub.code = code; sub.name = name; sub.totalMax = totalMax; sub.color = color; }
                 showToast(`อัปเดตวิชา "${name}" เรียบร้อยแล้ว`, 'success');
             } else {
-                appData.subjects.push({
-                    id: 'sub-' + Date.now(),
-                    roomIds,
-                    code,
-                    name,
-                    totalMax,
-                    color
-                });
+                appData.subjects.push({ id: 'sub-' + Date.now(), roomIds, code, name, totalMax, color });
                 showToast(`เพิ่มวิชา "${name}" (${roomIds.length} ห้อง) เรียบร้อยแล้ว`, 'success');
             }
-
             resetSubjectForm();
             saveAppData();
             refreshAllViews();
@@ -1820,7 +1963,6 @@
                 container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">ยังไม่มีรายวิชาในหมวดนี้</div>`;
                 return;
             }
-
             container.innerHTML = filtered.map(sub => {
                 const c = COLOR_MAP[sub.color] || COLOR_MAP.sky;
                 const roomBadges = (sub.roomIds || []).map(rid =>
@@ -1837,31 +1979,23 @@
                             <p class="text-[11px] text-slate-400">คะแนนเก็บเต็ม ${sub.totalMax} คะแนน • นักเรียนรวม ${getStudentsForSubject(sub).length} คน</p>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
-                            <button onclick="startEditSubject('${sub.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs font-medium transition">
-                                <i class="fa-solid fa-pen mr-1"></i>แก้ไข
-                            </button>
-                            <button onclick="deleteSubject('${sub.id}')" class="px-3 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 text-xs font-medium transition">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
+                            <button onclick="startEditSubject('${sub.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs font-medium transition"><i class="fa-solid fa-pen mr-1"></i>แก้ไข</button>
+                            <button onclick="deleteSubject('${sub.id}')" class="px-3 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 text-xs font-medium transition"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        // --- Assign Quest ---
         function populateSubjectsForQuestForm() {
             const roomId = document.getElementById('new-quest-room').value;
             const subSelect = document.getElementById('new-quest-subject');
             const subs = roomId ? getSubjectsForRoom(roomId) : [];
-
             if (subs.length === 0) {
                 subSelect.innerHTML = `<option value="">-- ยังไม่มีรายวิชาในห้องนี้ --</option>`;
                 return;
             }
-            subSelect.innerHTML = subs.map(s =>
-                `<option value="${s.id}">${s.code} - ${s.name} (${getSubjectRoomsLabel(s)})</option>`
-            ).join('');
+            subSelect.innerHTML = subs.map(s => `<option value="${s.id}">${s.code} - ${s.name} (${getSubjectRoomsLabel(s)})</option>`).join('');
         }
 
         function setDefaultDeadlineInput() {
@@ -1887,21 +2021,11 @@
             const title = document.getElementById('new-quest-title').value.trim();
             const maxScore = parseInt(document.getElementById('new-quest-max').value, 10) || 10;
             const deadlineStr = document.getElementById('new-quest-deadline').value;
-
             if (!subjectId || !title || !deadlineStr) {
                 showToast('กรุณากรอกข้อมูลงานให้ครบถ้วนครับ', 'error');
                 return;
             }
-
-            const deadlineMs = new Date(deadlineStr).getTime();
-            appData.quests.push({
-                id: 'q-' + Date.now(),
-                subjectId,
-                title,
-                maxScore,
-                deadline: deadlineMs
-            });
-
+            appData.quests.push({ id: 'q-' + Date.now(), subjectId, title, maxScore, deadline: new Date(deadlineStr).getTime() });
             document.getElementById('new-quest-title').value = '';
             saveAppData();
             refreshAllViews();
@@ -1920,12 +2044,10 @@
             const container = document.getElementById('teacher-quest-overview');
             const badge = document.getElementById('teacher-total-quests-badge');
             badge.textContent = `${appData.quests.length} งาน`;
-
             if (appData.quests.length === 0) {
                 container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">ยังไม่มีรายการงานที่สั่ง</div>`;
                 return;
             }
-
             const sorted = [...appData.quests].sort((a, b) => b.deadline - a.deadline);
             container.innerHTML = sorted.map(q => {
                 const sub = appData.subjects.find(s => s.id === q.subjectId) || { name: 'ไม่ระบุวิชา', roomIds: [] };
@@ -1946,25 +2068,19 @@
                                 <span class="${cd.status === 'overdue' ? 'text-rose-400' : 'text-emerald-400'}">${cd.text}</span>
                             </div>
                         </div>
-                        <button onclick="deleteQuest('${q.id}')" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 text-xs transition shrink-0">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <button onclick="deleteQuest('${q.id}')" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 text-xs transition shrink-0"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 `;
             }).join('');
         }
 
-        // --- Grading Table (with Multi-Room Pills) ---
         function onGradeRoomChange() {
             const roomId = document.getElementById('grade-room-select').value;
             const subSelect = document.getElementById('grade-subject-select');
             const subs = roomId ? getSubjectsForRoom(roomId) : [];
-
-            if (subs.length === 0) {
-                subSelect.innerHTML = `<option value="">-- ไม่มีวิชาในห้องนี้ --</option>`;
-            } else {
-                subSelect.innerHTML = subs.map(s => `<option value="${s.id}">${s.code} - ${s.name}</option>`).join('');
-            }
+            subSelect.innerHTML = subs.length === 0
+                ? `<option value="">-- ไม่มีวิชาในห้องนี้ --</option>`
+                : subs.map(s => `<option value="${s.id}">${s.code} - ${s.name}</option>`).join('');
             activeGradingRoomFilter = roomId || 'all';
             onGradeSubjectChange();
         }
@@ -1973,12 +2089,9 @@
             const subjectId = document.getElementById('grade-subject-select').value;
             const questSelect = document.getElementById('grade-quest-select');
             const quests = subjectId ? appData.quests.filter(q => q.subjectId === subjectId) : [];
-
-            if (quests.length === 0) {
-                questSelect.innerHTML = `<option value="">-- ยังไม่มีชิ้นงานในวิชานี้ --</option>`;
-            } else {
-                questSelect.innerHTML = quests.map(q => `<option value="${q.id}">${q.title} (เต็ม ${q.maxScore})</option>`).join('');
-            }
+            questSelect.innerHTML = quests.length === 0
+                ? `<option value="">-- ยังไม่มีชิ้นงานในวิชานี้ --</option>`
+                : quests.map(q => `<option value="${q.id}">${q.title} (เต็ม ${q.maxScore})</option>`).join('');
             renderGradingTable();
         }
 
@@ -2000,7 +2113,6 @@
             const tbody = document.getElementById('grading-table-body');
             const multiBar = document.getElementById('grade-multi-room-bar');
             const multiPills = document.getElementById('grade-multi-room-pills');
-
             const sub = appData.subjects.find(s => s.id === subjectId);
             const quest = appData.quests.find(q => q.id === questId);
 
@@ -2012,17 +2124,13 @@
 
             if (sub.roomIds.length > 1) {
                 multiBar.classList.remove('hidden');
-                if (activeGradingRoomFilter !== 'all' && !sub.roomIds.includes(activeGradingRoomFilter)) {
-                    activeGradingRoomFilter = 'all';
-                }
+                if (activeGradingRoomFilter !== 'all' && !sub.roomIds.includes(activeGradingRoomFilter)) activeGradingRoomFilter = 'all';
                 const pills = [
                     `<button type="button" onclick="setGradingRoomFilter('all')" class="px-2.5 py-1 rounded-lg text-xs font-medium transition ${activeGradingRoomFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">ทุกห้องที่เรียนรวม (${getStudentsForSubject(sub).length})</button>`
                 ];
                 sub.roomIds.forEach(rid => {
                     const cnt = appData.students.filter(s => s.roomId === rid).length;
-                    pills.push(
-                        `<button type="button" onclick="setGradingRoomFilter('${rid}')" class="px-2.5 py-1 rounded-lg text-xs font-medium transition ${activeGradingRoomFilter === rid ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">${getClassroomName(rid)} (${cnt})</button>`
-                    );
+                    pills.push(`<button type="button" onclick="setGradingRoomFilter('${rid}')" class="px-2.5 py-1 rounded-lg text-xs font-medium transition ${activeGradingRoomFilter === rid ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">${getClassroomName(rid)} (${cnt})</button>`);
                 });
                 multiPills.innerHTML = pills.join('');
             } else {
@@ -2039,12 +2147,20 @@
             tbody.innerHTML = students.map(st => {
                 const sData = getSubmission(st.id, quest.id);
                 const scoreVal = typeof sData.score === 'number' ? sData.score : '';
+                const stuAvatar = st.profileImg
+                    ? `<img src="${st.profileImg}" class="w-7 h-7 rounded-full object-cover border border-slate-700 shrink-0">`
+                    : `<span class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-sm shrink-0">${st.avatar || '🎓'}</span>`;
                 return `
                     <tr class="hover:bg-slate-900/50 transition">
                         <td class="py-3 px-3 font-mono-code text-xs text-sky-400 font-bold">${st.id}</td>
                         <td class="py-3 px-3">
-                            <div class="font-medium text-white">${st.name}</div>
-                            <div class="text-[11px] text-slate-400">${getClassroomName(st.roomId)}</div>
+                            <div class="flex items-center gap-2.5">
+                                ${stuAvatar}
+                                <div>
+                                    <div class="font-medium text-white">${st.name}</div>
+                                    <div class="text-[11px] text-slate-400">${getClassroomName(st.roomId)}</div>
+                                </div>
+                            </div>
                         </td>
                         <td class="py-3 px-3 text-center">
                             <button type="button" onclick="toggleSubmissionStatus('${st.id}', '${quest.id}')"
@@ -2055,8 +2171,7 @@
                         <td class="py-3 px-3 text-xs">
                             ${sData.link ? `
                                 <a href="${sData.link}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 transition">
-                                    <i class="fa-solid fa-up-right-from-square"></i>
-                                    <span>เปิดลิงก์งาน</span>
+                                    <i class="fa-solid fa-up-right-from-square"></i><span>เปิดลิงก์งาน</span>
                                 </a>
                             ` : `<span class="text-slate-500">-</span>`}
                         </td>
@@ -2070,9 +2185,7 @@
                         </td>
                         <td class="py-3 px-3 text-right">
                             <button type="button" onclick="giveFullScore('${st.id}', '${quest.id}', ${quest.maxScore})"
-                                class="px-2.5 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-xs font-medium transition">
-                                เต็ม (${quest.maxScore})
-                            </button>
+                                class="px-2.5 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-xs font-medium transition">เต็ม (${quest.maxScore})</button>
                         </td>
                     </tr>
                 `;
@@ -2082,9 +2195,7 @@
         function toggleSubmissionStatus(studentId, questId) {
             const sData = getSubmission(studentId, questId);
             sData.submitted = !sData.submitted;
-            if (!sData.submitted) {
-                sData.score = null;
-            }
+            if (!sData.submitted) sData.score = null;
             saveAppData();
             renderGradingTable();
         }
@@ -2095,8 +2206,7 @@
             if (rawVal === '' || rawVal === null) {
                 sData.score = null;
             } else {
-                const num = Math.max(0, Math.min(quest ? quest.maxScore : 100, Number(rawVal)));
-                sData.score = num;
+                sData.score = Math.max(0, Math.min(quest ? quest.maxScore : 100, Number(rawVal)));
                 sData.submitted = true;
             }
             saveAppData();
@@ -2119,7 +2229,6 @@
             const sub = appData.subjects.find(s => s.id === subjectId);
             const quest = appData.quests.find(q => q.id === questId);
             if (!sub || !quest) return;
-
             const students = getCurrentGradingStudents(sub);
             students.forEach(st => {
                 const sData = getSubmission(st.id, quest.id);
@@ -2131,9 +2240,160 @@
             showToast(`ให้ส่งครบและคะแนนเต็มทั้ง ${students.length} คนเรียบร้อย!`, 'success');
         }
 
-        // =========================================================================
-        // 6. การเริ่มต้นระบบ & Live Countdown Ticker
-        // =========================================================================
+        function onSummaryRoomChange() {
+            const roomId = document.getElementById('summary-room-select')?.value;
+            const subSelect = document.getElementById('summary-subject-select');
+            if (!subSelect) return;
+            const subs = roomId ? getSubjectsForRoom(roomId) : [];
+            subSelect.innerHTML = subs.length === 0
+                ? `<option value="">-- ไม่มีรายวิชาในห้องนี้ --</option>`
+                : subs.map(s => `<option value="${s.id}">${s.code} - ${s.name}</option>`).join('');
+            renderSubjectSummaryTable();
+        }
+
+        function getSubjectSummaryMatrix() {
+            const roomId = document.getElementById('summary-room-select')?.value;
+            const subjectId = document.getElementById('summary-subject-select')?.value;
+            const sub = appData.subjects.find(s => s.id === subjectId);
+            if (!roomId || !sub) return null;
+
+            const students = appData.students
+                .filter(s => s.roomId === roomId)
+                .sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
+            const quests = appData.quests
+                .filter(q => q.subjectId === subjectId)
+                .sort((a, b) => a.deadline - b.deadline);
+
+            const totalQuestMax = quests.reduce((sum, q) => sum + (Number(q.maxScore) || 0), 0);
+            const rows = students.map(st => {
+                let earned = 0, submittedCount = 0;
+                const questScores = quests.map(q => {
+                    const sData = getSubmission(st.id, q.id);
+                    if (sData.submitted) submittedCount++;
+                    if (typeof sData.score === 'number') {
+                        earned += sData.score;
+                        return { submitted: true, score: sData.score, max: q.maxScore };
+                    }
+                    return { submitted: sData.submitted, score: null, max: q.maxScore };
+                });
+                const pct = totalQuestMax > 0 ? Math.round((earned / totalQuestMax) * 100) : 0;
+                return { student: st, questScores, earned, totalQuestMax, submittedCount, totalQuests: quests.length, pct };
+            });
+
+            return { roomId, roomName: getClassroomName(roomId), subject: sub, quests, totalQuestMax, rows };
+        }
+
+        function renderSubjectSummaryTable() {
+            const thead = document.getElementById('summary-table-head');
+            const tbody = document.getElementById('summary-table-body');
+            const metaBar = document.getElementById('summary-meta-bar');
+            if (!thead || !tbody || !metaBar) return;
+
+            const matrix = getSubjectSummaryMatrix();
+            if (!matrix) {
+                metaBar.innerHTML = '';
+                thead.innerHTML = '';
+                tbody.innerHTML = `<tr><td class="py-8 text-center text-slate-500 text-xs">กรุณาเลือกห้องเรียนและรายวิชาเพื่อดูตารางสรุปคะแนน</td></tr>`;
+                return;
+            }
+
+            const { roomName, subject, quests, totalQuestMax, rows } = matrix;
+            const avgScore = rows.length > 0 ? (rows.reduce((s, r) => s + r.earned, 0) / rows.length).toFixed(1) : '0.0';
+
+            metaBar.innerHTML = `
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-medium">${roomName}</span>
+                    <span class="text-white font-semibold">${subject.code} ${subject.name}</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <span>นักเรียนทั้งหมด <b class="text-white">${rows.length}</b> คน</span>
+                    <span>ภารกิจ <b class="text-white">${quests.length}</b> ชิ้น (รวม <b class="text-cyan-300">${totalQuestMax}</b> คะแนน)</span>
+                    <span>คะแนนเฉลี่ยห้อง <b class="text-emerald-400">${avgScore}</b></span>
+                </div>
+            `;
+
+            thead.innerHTML = `
+                <tr>
+                    <th class="py-3 px-3 whitespace-nowrap">รหัส</th>
+                    <th class="py-3 px-3 whitespace-nowrap">ชื่อ - นามสกุล</th>
+                    ${quests.map((q, idx) => `
+                        <th class="py-3 px-3 text-center min-w-[110px]" title="${q.title}">
+                            <div class="text-cyan-300 font-semibold">งานที่ ${idx + 1}</div>
+                            <div class="text-[10px] text-slate-400 font-normal truncate max-w-[120px] mx-auto">${q.title}</div>
+                            <div class="text-[10px] text-slate-500 font-mono-code">(เต็ม ${q.maxScore})</div>
+                        </th>
+                    `).join('')}
+                    <th class="py-3 px-3 text-center whitespace-nowrap bg-slate-900">ส่งงาน</th>
+                    <th class="py-3 px-3 text-center whitespace-nowrap bg-slate-900 text-emerald-300">รวมคะแนน (${totalQuestMax})</th>
+                    <th class="py-3 px-3 text-center whitespace-nowrap bg-slate-900">ร้อยละ</th>
+                </tr>
+            `;
+
+            if (rows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${quests.length + 5}" class="py-8 text-center text-slate-500 text-xs">ยังไม่มีรายชื่อนักเรียนในห้องนี้</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = rows.map(r => {
+                const stuAvatar = r.student.profileImg
+                    ? `<img src="${r.student.profileImg}" class="w-6 h-6 rounded-full object-cover border border-slate-700 shrink-0">`
+                    : `<span class="text-sm">${r.student.avatar || '🎓'}</span>`;
+                const qCells = r.questScores.map(qs => {
+                    if (typeof qs.score === 'number') return `<td class="py-2.5 px-3 text-center font-mono-code text-xs text-emerald-300 font-bold">${qs.score}</td>`;
+                    if (qs.submitted) return `<td class="py-2.5 px-3 text-center text-[11px] text-amber-300">รอตรวจ</td>`;
+                    return `<td class="py-2.5 px-3 text-center text-xs text-rose-400/70">-</td>`;
+                }).join('');
+                const pctColor = r.pct >= 80 ? 'text-emerald-400' : (r.pct >= 50 ? 'text-amber-300' : 'text-rose-400');
+
+                return `
+                    <tr class="hover:bg-slate-900/50 transition">
+                        <td class="py-2.5 px-3 font-mono-code text-xs text-sky-400 font-bold whitespace-nowrap">${r.student.id}</td>
+                        <td class="py-2.5 px-3 whitespace-nowrap">
+                            <div class="flex items-center gap-2">${stuAvatar}<span class="text-white font-medium">${r.student.name}</span></div>
+                        </td>
+                        ${qCells}
+                        <td class="py-2.5 px-3 text-center font-mono-code text-xs text-slate-300">${r.submittedCount}/${r.totalQuests}</td>
+                        <td class="py-2.5 px-3 text-center font-mono-code text-sm font-bold text-white">${r.earned}</td>
+                        <td class="py-2.5 px-3 text-center font-mono-code text-xs font-bold ${pctColor}">${r.pct}%</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportSubjectSummaryCSV() {
+            const matrix = getSubjectSummaryMatrix();
+            if (!matrix || matrix.rows.length === 0) {
+                showToast('ไม่มีข้อมูลสำหรับส่งออกไฟล์ครับ', 'error');
+                return;
+            }
+            const { roomName, subject, quests, totalQuestMax, rows } = matrix;
+            const headers = [
+                'รหัสนักเรียน', 'ชื่อ-นามสกุล', 'ห้องเรียน',
+                ...quests.map((q, i) => `งานที่ ${i + 1}: ${q.title} (เต็ม ${q.maxScore})`),
+                'จำนวนงานที่ส่ง', `คะแนนรวม (เต็ม ${totalQuestMax})`, 'ร้อยละ'
+            ];
+            const csvLines = [headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(',')];
+            rows.forEach(r => {
+                const cols = [
+                    r.student.id, r.student.name, roomName,
+                    ...r.questScores.map(qs => (typeof qs.score === 'number' ? qs.score : (qs.submitted ? 'รอตรวจ' : '0'))),
+                    `${r.submittedCount}/${r.totalQuests}`, r.earned, `${r.pct}%`
+                ];
+                csvLines.push(cols.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','));
+            });
+            const bom = '\uFEFF';
+            const blob = new Blob([bom + csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `สรุปคะแนน_${subject.code}_${roomName}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('ดาวน์โหลดไฟล์ตารางสรุปคะแนน (CSV) เรียบร้อยแล้ว!', 'success');
+        }
+
         function refreshAllViews() {
             populateStudentFilters();
             renderStudentDashboard();
